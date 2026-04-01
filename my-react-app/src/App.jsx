@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
-import DashboardPage from './components/DashboardPage'
-import ResourcesPage from './components/ResourcesPage'
-import Sidebar from './components/Sidebar'
+import { useState } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "./assets/vite.svg";
+import heroImg from "./assets/hero.png";
+import "./App.css";
 
 function App() {
-  const [route, setRoute] = useState(window.location.pathname || '/')
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
     const handlePopState = () => setRoute(window.location.pathname || '/')
@@ -24,15 +25,10 @@ function App() {
         <Sidebar route={route} onNavigate={navigate} />
       </aside>
 
-      <main className="p-4 md:p-7">
-        {route === '/resources' ? (
-          <ResourcesPage />
-        ) : (
-          <DashboardPage onNavigate={navigate} />
-        )}
-      </main>
-    </div>
-  )
+      <div className="ticks"></div>
+      <section id="spacer"></section>
+    </>
+  );
 }
 
-export default App
+export default App;
