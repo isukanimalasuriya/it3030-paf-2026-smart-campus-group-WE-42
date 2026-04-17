@@ -4,7 +4,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import DashboardPage from "./components/DashboardPage";
 import ResourcesPage from "./components/ResourcesPage";
-//import BookingsPage from "./components/BookingsPage";
+import BookingsPage from "./components/BookingsPage";
+import AdminBookingsPage from "./components/AdminBookingsPage";
 
 function PlaceholderPage({ title, subtitle }) {
   return (
@@ -32,6 +33,8 @@ function Shell() {
         <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/bookings" element={<BookingsPage />} />
+          <Route path="/admin/bookings" element={<AdminBookingsPage />} />
 
           <Route
             path="/analytics"
