@@ -1,111 +1,101 @@
-import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
+import { useMemo } from "react";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Sidebar from "./components/Sidebar";
-import StudentSidebar from "./components/StudentSidebar";
 import DashboardPage from "./components/DashboardPage";
 import ResourcesPage from "./components/ResourcesPage";
+import NotificationBell from "./components/NotificationBell";
 import BookingsPage from "./components/BookingsPage";
 import AdminBookingsPage from "./components/AdminBookingsPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import OAuth2RedirectPage from "./pages/OAuth2RedirectPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
+import { useAuth } from "./contexts/AuthContext";
 
-function PlaceholderPage({ title, subtitle }) {
-  return (
-    <div>
-      <h1 className="text-xl font-medium text-slate-900">{title}</h1>
-      <p className="text-sm text-slate-500 mb-4">{subtitle}</p>
-      <div className="flex items-center justify-center h-64 bg-white rounded-2xl ring-1 ring-slate-200">
-        <p className="text-slate-400 text-sm">Content coming soon</p>
-      </div>
-    </div>
-  );
-}
+function App() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
 
-// Admin shell (unchanged)
-function AdminShell() {
-  const [collapsed, setCollapsed] = useState(false);
+  const route = useMemo(() => location.pathname || "/", [location.pathname]);
+
+  const handleNavigate = (nextRoute) => {
+    if (nextRoute === route) return;
+    navigate(nextRoute);
+  };
+
   return (
-    <div className="flex h-screen bg-slate-100 font-poppins">
-      <Sidebar
-        collapsed={collapsed}
-        onToggle={() => setCollapsed(!collapsed)}
+    <Routes>
+      <Route
+        path="/login"
+        element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
       />
-      <main className="flex-1 overflow-y-auto p-5">
-        <Routes>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/resources" element={<ResourcesPage />} />
-          <Route path="/bookings" element={<BookingsPage />} />
-          <Route path="/admin/bookings" element={<AdminBookingsPage />} />
-          <Route
-            path="/analytics"
-            element={
-              <PlaceholderPage
-                title="Analytics"
-                subtitle="Insights coming soon"
-              />
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <PlaceholderPage title="Settings" subtitle="System settings" />
-            }
-          />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </main>
-    </div>
-  );
-}
-
-// Student shell — new
-function StudentShell() {
-  const [collapsed, setCollapsed] = useState(false);
-  return (
-    <div
-      className="flex h-screen font-poppins"
-      style={{ background: "#F7F6F3" }}
-    >
-      <StudentSidebar
-        collapsed={collapsed}
-        onToggle={() => setCollapsed(!collapsed)}
+      <Route
+        path="/register"
+        element={
+          isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />
+        }
       />
-      <main className="flex-1 overflow-y-auto p-6">
-        <Routes>
-          
-          {/*<Route path="/" element={<StudentDashboardPage />} />*/}
-          {/*<Route path="/bookings" element={<StudentBookingsPage />} />*/}
-          {/*<Route path="/history" element={<StudentHistoryPage />} />*/}
-          <Route
-            path="/resources"
-            element={
-              <PlaceholderPage
-                title="Resources"
-                subtitle="Browse campus resources"
-              />
-            }
-          />
-          <Route
-            path="/schedule"
-            element={
-              <PlaceholderPage title="Schedule" subtitle="Your timetable" />
-            }
-          />
-          <Route path="*" element={<Navigate to="/student" />} />
-        </Routes>
-      </main>
-    </div>
+      <Route path="/oauth2/redirect" element={<OAuth2RedirectPage />} />
+
+      <Route element={<ProtectedRoute />}>
+        <Route
+          path="/*"
+          element={
+            <div className="font-poppins grid min-h-screen grid-cols-1 bg-slate-100 md:grid-cols-[250px_1fr]">
+              <aside className="flex flex-col gap-6 bg-slate-900 p-5 md:p-6">
+                <Sidebar
+                  user={user}
+                  logout={logout}
+                  route={route}
+                  onNavigate={handleNavigate}
+                />
+              </aside>
+
+              <main className="p-5 md:p-8">
+                <div className="mb-5 flex items-center justify-end">
+                  <NotificationBell />
+                </div>
+                <Routes>
+                  <Route
+                    path="/"
+                    element={<DashboardPage onNavigate={handleNavigate} />}
+                  />
+                  <Route path="/resources" element={<ResourcesPage />} />
+                  <Route path="/bookings" element={<BookingsPage />} />
+                  <Route
+                    path="/admin/bookings"
+                    element={<AdminBookingsPage />}
+                  />
+                  {/* Role-protected routes */}
+                  <Route element={<ProtectedRoute requiredRoles={["ADMIN"]} />}>
+                    <Route path="/admin" element={<AdminUsersPage />} />
+                  </Route>
+                  <Route
+                    element={
+                      <ProtectedRoute requiredRoles={["TECHNICIAN", "ADMIN"]} />
+                    }
+                  >
+                    <Route
+                      path="/maintenance"
+                      element={<div>Maintenance Dashboard</div>}
+                    />
+                  </Route>
+                </Routes>
+              </main>
+            </div>
+          }
+        />
+      </Route>
+    </Routes>
   );
 }
 
-export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        {/* Student portal */}
-        <Route path="/student/*" element={<StudentShell />} />
-        {/* Admin portal — all other routes */}
-        <Route path="/*" element={<AdminShell />} />
-      </Routes>
-    </BrowserRouter>
-  );
-}
+export default App;
