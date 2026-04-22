@@ -22,6 +22,7 @@ public class User {
     private Role role = Role.USER;
     private String password;
     private boolean active = true;
+    private String status = "ACTIVE";
 
     public User() {}
 
@@ -82,5 +83,21 @@ public class User {
 
     public void setActive(boolean active) {
         this.active = active;
+        if (active) {
+            this.status = "ACTIVE";
+        }
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+        if ("ACTIVE".equals(status)) {
+            this.active = true;
+        } else {
+            this.active = false;
+        }
     }
 }

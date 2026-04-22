@@ -131,18 +131,29 @@ export default function AdminUsersPage() {
                     </select>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${u.active ? 'bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-200' : 'bg-red-50 text-red-600 ring-1 ring-inset ring-red-200'}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${u.active ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
-                      {u.active ? 'Active' : 'Banned'}
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                      u.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-200' : 
+                      u.status === 'PENDING' ? 'bg-amber-50 text-amber-600 ring-1 ring-inset ring-amber-200' : 
+                      'bg-red-50 text-red-600 ring-1 ring-inset ring-red-200'
+                    }`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${
+                        u.status === 'ACTIVE' ? 'bg-emerald-500' : 
+                        u.status === 'PENDING' ? 'bg-amber-500' : 
+                        'bg-red-500'
+                      }`}></span>
+                      {u.status === 'ACTIVE' ? 'Active' : u.status === 'PENDING' ? 'Pending' : 'Banned'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <button
-                      onClick={() => handleToggleStatus(u.id, u.active)}
+                      onClick={() => handleToggleStatus(u.id, u.status === 'ACTIVE')}
                       disabled={u.id === currentUser?.id}
-                      className={`rounded-lg px-4 py-2 text-xs font-semibold shadow-sm transition disabled:opacity-50 ${u.active ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 ring-1 ring-inset ring-rose-200/50' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 ring-1 ring-inset ring-emerald-200/50'}`}
+                      className={`rounded-lg px-4 py-2 text-xs font-semibold shadow-sm transition disabled:opacity-50 ${
+                        u.status === 'ACTIVE' ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 ring-1 ring-inset ring-rose-200/50' : 
+                        'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 ring-1 ring-inset ring-emerald-200/50'
+                      }`}
                     >
-                      {u.active ? 'Ban User' : 'Activate User'}
+                      {u.status === 'ACTIVE' ? 'Ban User' : u.status === 'PENDING' ? 'Approve User' : 'Unban User'}
                     </button>
                   </td>
                 </tr>

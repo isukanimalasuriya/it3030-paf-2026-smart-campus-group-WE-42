@@ -51,7 +51,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         }
 
         if (!user.isActive()) {
-            response.sendRedirect(frontendRedirectBase + "?error=Account+suspended");
+            response.sendRedirect(frontendRedirectBase + "?error=Account+pending+approval+or+suspended");
             return;
         }
 

@@ -25,8 +25,7 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody AuthRequest request) {
         try {
             User user = userService.registerUser(request.getName(), request.getEmail(), request.getPassword());
-            String token = jwtService.generateToken(user);
-            return ResponseEntity.ok(new AuthResponse(token, user.getName(), user.getEmail()));
+            return ResponseEntity.ok("Registration successful. Your account is pending admin approval.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
