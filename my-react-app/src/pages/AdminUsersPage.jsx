@@ -22,7 +22,15 @@ export default function AdminUsersPage() {
   const loadUsers = async () => {
     try {
       const data = await fetchUsers()
-      setUsers(data)
+      // Sort: PENDING first, then ACTIVE, then BANNED
+      const sortedUsers = [...data].sort((a, b) => {
+        if (a.status === 'PENDING' && b.status !== 'PENDING') return -1;
+        if (a.status !== 'PENDING' && b.status === 'PENDING') return 1;
+        if (a.status === 'ACTIVE' && b.status === 'BANNED') return -1;
+        if (a.status === 'BANNED' && b.status === 'ACTIVE') return 1;
+        return 0;
+      });
+      setUsers(sortedUsers)
     } catch (err) {
       setError('Failed to load users.')
     } finally {

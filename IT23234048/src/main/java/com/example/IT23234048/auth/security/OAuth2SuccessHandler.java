@@ -51,7 +51,11 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         }
 
         if (!user.isActive()) {
-            response.sendRedirect(frontendRedirectBase + "?error=Account+pending+approval+or+suspended");
+            String errorMsg = "Account+suspended+by+an+administrator";
+            if ("PENDING".equals(user.getStatus())) {
+                errorMsg = "Your+account+is+pending+admin+approval";
+            }
+            response.sendRedirect(frontendRedirectBase + "?error=" + errorMsg);
             return;
         }
 

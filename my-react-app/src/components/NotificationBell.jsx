@@ -95,37 +95,48 @@ export default function NotificationBell() {
               latest.map((n) => (
                 <div
                   key={n.id}
-                  className={`group relative flex gap-4 border-b border-slate-50 px-5 py-4 transition-colors hover:bg-slate-50/50 ${
-                    !n.isRead ? 'bg-indigo-50/30' : ''
+                  className={`group relative flex items-start gap-4 border-b border-slate-100 px-6 py-4 transition-all duration-200 hover:bg-slate-50 ${
+                    !n.isRead ? 'bg-indigo-50/20' : 'bg-white'
                   }`}
                 >
-                  {!n.isRead && (
-                    <div className="absolute left-1.5 top-1/2 -translate-y-1/2 h-1.5 w-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]"></div>
-                  )}
+                  <div className="mt-1.5 flex-shrink-0">
+                    {!n.isRead ? (
+                      <div className="h-2 w-2 rounded-full bg-indigo-600 shadow-[0_0_8px_rgba(79,70,229,0.5)] animate-pulse" />
+                    ) : (
+                      <div className="h-2 w-2 rounded-full bg-slate-200" />
+                    )}
+                  </div>
                   
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                       <span className={`inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ring-inset ${getTypeColor(n.type)}`}>
+                    <div className="flex items-center justify-between gap-2">
+                       <span className={`inline-flex rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wider ring-1 ring-inset ${getTypeColor(n.type)}`}>
                         {n.type.replace(/_/g, ' ')}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-medium">{timeAgo(n.createdAt)}</span>
+                      <span className="text-xs text-slate-400 font-medium whitespace-nowrap">{timeAgo(n.createdAt)}</span>
                     </div>
-                    <div className={`mt-1.5 text-sm leading-relaxed ${!n.isRead ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>
+                    <div className={`mt-2 text-sm leading-snug ${!n.isRead ? 'font-semibold text-slate-800' : 'text-slate-600'}`}>
                       {n.message}
                     </div>
-                    <div className="mt-3 flex items-center gap-3">
+                    
+                    <div className="mt-3 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       {!n.isRead && (
                         <button
                           onClick={() => markAsRead(n.id)}
-                          className="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline underline-offset-4 decoration-indigo-200"
+                          className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
                         >
-                          Mark as read
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          Mark read
                         </button>
                       )}
                       <button
                         onClick={() => remove(n.id)}
-                        className="text-xs font-medium text-slate-400 hover:text-red-500 transition-colors"
+                        className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-rose-500 transition-colors"
                       >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
                         Remove
                       </button>
                     </div>
