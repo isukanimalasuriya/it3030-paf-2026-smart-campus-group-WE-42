@@ -25,8 +25,7 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody AuthRequest request) {
         try {
             User user = userService.registerUser(request.getName(), request.getEmail(), request.getPassword());
-            String token = jwtService.generateToken(user);
-            return ResponseEntity.ok(new AuthResponse(token, user.getName(), user.getEmail()));
+            return ResponseEntity.ok("Registration successful. Your account is pending admin approval.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -38,6 +37,9 @@ public class AuthController {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             if (!user.isActive()) {
+                if ("PENDING".equals(user.getStatus())) {
+                    return ResponseEntity.status(403).body("Your account is pending admin approval.");
+                }
                 return ResponseEntity.status(403).body("Account suspended by an administrator.");
             }
             String token = jwtService.generateToken(user);

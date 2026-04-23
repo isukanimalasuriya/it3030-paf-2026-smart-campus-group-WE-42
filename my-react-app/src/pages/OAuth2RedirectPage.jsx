@@ -9,6 +9,12 @@ export default function OAuth2RedirectPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
+    const errParam = params.get('error')
+    if (errParam) {
+      setError(errParam)
+      return
+    }
+
     const token = params.get('token')
     if (!token) {
       setError('Missing token from redirect')

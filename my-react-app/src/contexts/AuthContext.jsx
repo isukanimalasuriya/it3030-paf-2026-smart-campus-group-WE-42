@@ -45,8 +45,8 @@ export function AuthProvider({ children }) {
 
   const registerUser = useCallback(async (name, email, password) => {
     const data = await apiRegister(name, email, password)
-    await setAuthFromToken(data.token)
-  }, [setAuthFromToken])
+    return data
+  }, [])
 
   useEffect(() => {
     const init = async () => {

@@ -1,5 +1,8 @@
 package com.example.IT23234048.service;
 
+import com.example.IT23234048.auth.model.Role;
+import com.example.IT23234048.auth.model.User;
+import com.example.IT23234048.auth.repository.UserRepository;
 import com.example.IT23234048.dto.BookingCreateDTO;
 import com.example.IT23234048.dto.BookingResponseDTO;
 import com.example.IT23234048.dto.BookingUpdateDTO;
@@ -7,6 +10,8 @@ import com.example.IT23234048.model.Booking;
 import com.example.IT23234048.model.BookingStatus;
 import com.example.IT23234048.model.Resource;
 import com.example.IT23234048.model.Student;
+import com.example.IT23234048.notification.model.NotificationType;
+import com.example.IT23234048.notification.service.NotificationService;
 import com.example.IT23234048.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +30,12 @@ public class BookingService {
 
     @Autowired
     private StudentService studentService;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public BookingResponseDTO createBooking(BookingCreateDTO createDTO) throws Exception {
         // Validate resource exists
@@ -70,6 +81,17 @@ public class BookingService {
         booking.setStatus(BookingStatus.PENDING);
 
         Booking savedBooking = bookingRepository.save(booking);
+
+        // Notify admins
+        List<User> admins = userRepository.findByRole(Role.ADMIN);
+        for (User admin : admins) {
+            notificationService.createNotification(
+                    admin.getId(),
+                    "New booking request for " + resource.getName() + " by " + student.getUsername(),
+                    NotificationType.BOOKING_CREATED
+            );
+        }
+
         return new BookingResponseDTO(savedBooking);
     }
 
@@ -187,6 +209,19 @@ public class BookingService {
 
         booking.setStatus(newStatus);
         Booking savedBooking = bookingRepository.save(booking);
+
+        // Notify student
+        if (booking.getStudent() != null) {
+            String message = "Your booking for " + booking.getResource().getName() + " has been " + newStatus.name().toLowerCase() + ".";
+            NotificationType type = newStatus == BookingStatus.APPROVED ? NotificationType.BOOKING_APPROVED : NotificationType.BOOKING_REJECTED;
+            
+            // Find user id by student email. Wait, the notification service takes 'userId'. Let's find the user.
+            Optional<User> userOpt = userRepository.findByEmail(booking.getStudent().getEmail());
+            if (userOpt.isPresent()) {
+                notificationService.createNotification(userOpt.get().getId(), message, type);
+            }
+        }
+
         return new BookingResponseDTO(savedBooking);
     }
 
