@@ -21,6 +21,10 @@ public class Comment {
         return commentId;
     }
 
+    public void setCommentId(String commentId) {
+        this.commentId = commentId;
+    }
+
     public String getTicketId() {
         return ticketId;
     }
