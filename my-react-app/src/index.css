@@ -4,3 +4,22 @@
 @theme {
   --font-poppins: "Poppins", sans-serif;
 }
+
+@layer utilities {
+  .animate-enter {
+    animation: enter 0.2s ease-out;
+  }
+  .animate-leave {
+    animation: leave 0.15s ease-in forwards;
+  }
+}
+
+@keyframes enter {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes leave {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0; }
+}
