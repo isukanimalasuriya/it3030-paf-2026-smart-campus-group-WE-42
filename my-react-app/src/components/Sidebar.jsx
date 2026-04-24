@@ -63,6 +63,42 @@ const NAV_GROUPS = [
           </svg>
         ),
       },
+      {
+        id: "tickets",
+        label: "Tickets",
+        path: "/tickets",
+        icon: (
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.6}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-4 h-4 shrink-0"
+          >
+            <path d="M9 12h6m-6 4h4m-5-9h8a2 2 0 012 2v8a2 2 0 01-2 2H8a2 2 0 01-2-2V9a2 2 0 012-2zm1-3h6a1 1 0 011 1v2H8V5a1 1 0 011-1z" />
+          </svg>
+        ),
+      },
+      {
+        id: "schedule",
+        label: "Schedule",
+        path: "/schedule",
+        icon: (
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.6}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-4 h-4 shrink-0"
+          >
+            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        ),
+      }
     ],
   },
 ];
