@@ -41,3 +41,17 @@ export async function resolveTicket(ticketId, resolutionNotes) {
   const { data } = await api.put(`/api/tickets/${ticketId}/resolution`, { resolutionNotes });
   return data;
 }
+
+export async function addComment(ticketId, text) {
+  const { data } = await api.post(`/api/tickets/${ticketId}/comments`, { text });
+  return data;
+}
+
+export async function updateComment(commentId, text) {
+  const { data } = await api.put(`/api/comments/${commentId}`, { text });
+  return data;
+}
+
+export async function deleteComment(commentId) {
+  await api.delete(`/api/comments/${commentId}`);
+}
