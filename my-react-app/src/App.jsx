@@ -18,16 +18,16 @@ import { useAuth } from './contexts/AuthContext'
 import { Toaster } from 'react-hot-toast'
 
 function App() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { isAuthenticated, user, logout } = useAuth()
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
 
-  const route = useMemo(() => location.pathname || '/', [location.pathname])
+  const route = useMemo(() => location.pathname || "/", [location.pathname]);
 
   const handleNavigate = (nextRoute) => {
-    if (nextRoute === route) return
-    navigate(nextRoute)
-  }
+    if (nextRoute === route) return;
+    navigate(nextRoute);
+  };
 
   return (
     <>
@@ -39,7 +39,9 @@ function App() {
       />
       <Route
         path="/register"
-        element={isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />}
+        element={
+          isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />
+        }
       />
       <Route path="/oauth2/redirect" element={<OAuth2RedirectPage />} />
 
@@ -57,7 +59,10 @@ function App() {
                   <NotificationBell />
                 </div>
                 <Routes>
-                  <Route path="/" element={<DashboardPage onNavigate={handleNavigate} />} />
+                  <Route
+                    path="/"
+                    element={<DashboardPage onNavigate={handleNavigate} />}
+                  />
                   <Route path="/resources" element={<ResourcesPage />} />
                   <Route path="/bookings" element={<BookingsPage />} />
                   <Route path="/admin/bookings" element={<AdminBookingsPage />} />
@@ -66,11 +71,18 @@ function App() {
                   <Route path="/tickets/:id" element={<TicketDetail />} />
                   
                   {/* Role-protected routes */}
-                  <Route element={<ProtectedRoute requiredRoles={['ADMIN']} />}>
+                  <Route element={<ProtectedRoute requiredRoles={["ADMIN"]} />}>
                     <Route path="/admin" element={<AdminUsersPage />} />
                   </Route>
-                  <Route element={<ProtectedRoute requiredRoles={['TECHNICIAN', 'ADMIN']} />}>
-                    <Route path="/maintenance" element={<div>Maintenance Dashboard</div>} />
+                  <Route
+                    element={
+                      <ProtectedRoute requiredRoles={["TECHNICIAN", "ADMIN"]} />
+                    }
+                  >
+                    <Route
+                      path="/maintenance"
+                      element={<div>Maintenance Dashboard</div>}
+                    />
                   </Route>
                 </Routes>
               </main>
