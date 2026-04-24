@@ -18,6 +18,7 @@ import RegisterPage from "./pages/RegisterPage";
 import OAuth2RedirectPage from "./pages/OAuth2RedirectPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
 import { useAuth } from "./contexts/AuthContext";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const location = useLocation();
@@ -32,69 +33,78 @@ function App() {
   };
 
   return (
-    <Routes>
-      <Route
-        path="/login"
-        element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
-      />
-      <Route
-        path="/register"
-        element={
-          isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />
-        }
-      />
-      <Route path="/oauth2/redirect" element={<OAuth2RedirectPage />} />
-
-      <Route element={<ProtectedRoute />}>
+    <>
+      <Toaster />
+      <Routes>
         <Route
-          path="/*"
+          path="/login"
           element={
-            <div className="font-poppins grid min-h-screen grid-cols-1 bg-slate-100 md:grid-cols-[250px_1fr]">
-              <aside className="sticky top-0 h-screen flex flex-col gap-6 bg-slate-900 p-5 md:p-6 overflow-hidden">
-                <Sidebar
-                  user={user}
-                  logout={logout}
-                  route={route}
-                  onNavigate={handleNavigate}
-                />
-              </aside>
-
-              <main className="p-5 md:p-8">
-                <div className="mb-5 flex items-center justify-end">
-                  <NotificationBell />
-                </div>
-                <Routes>
-                  <Route
-                    path="/"
-                    element={<DashboardPage onNavigate={handleNavigate} />}
-                  />
-                  <Route path="/resources" element={<ResourcesPage />} />
-                  <Route path="/bookings" element={<BookingsPage />} />
-                  <Route
-                    path="/admin/bookings"
-                    element={<AdminBookingsPage />}
-                  />
-                  {/* Role-protected routes */}
-                  <Route element={<ProtectedRoute requiredRoles={["ADMIN"]} />}>
-                    <Route path="/admin" element={<AdminUsersPage />} />
-                  </Route>
-                  <Route
-                    element={
-                      <ProtectedRoute requiredRoles={["TECHNICIAN", "ADMIN"]} />
-                    }
-                  >
-                    <Route
-                      path="/maintenance"
-                      element={<div>Maintenance Dashboard</div>}
-                    />
-                  </Route>
-                </Routes>
-              </main>
-            </div>
+            isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />
           }
         />
-      </Route>
-    </Routes>
+        <Route
+          path="/register"
+          element={
+            isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />
+          }
+        />
+        <Route path="/oauth2/redirect" element={<OAuth2RedirectPage />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route
+            path="/*"
+            element={
+              <div className="font-poppins grid min-h-screen grid-cols-1 bg-slate-100 md:grid-cols-[250px_1fr]">
+                <aside className="sticky top-0 h-screen flex flex-col gap-6 bg-slate-900 p-5 md:p-6 overflow-hidden">
+                  <Sidebar
+                    user={user}
+                    logout={logout}
+                    route={route}
+                    onNavigate={handleNavigate}
+                  />
+                </aside>
+
+                <main className="p-5 md:p-8">
+                  <div className="mb-5 flex items-center justify-end">
+                    <NotificationBell />
+                  </div>
+                  <Routes>
+                    <Route
+                      path="/"
+                      element={<DashboardPage onNavigate={handleNavigate} />}
+                    />
+                    <Route path="/resources" element={<ResourcesPage />} />
+                    <Route path="/bookings" element={<BookingsPage />} />
+                    {/* Role-protected routes */}
+                    <Route
+                      element={<ProtectedRoute requiredRoles={["ADMIN"]} />}
+                    >
+                      <Route path="/admin" element={<AdminUsersPage />} />
+                      <Route
+                        path="/admin/bookings"
+                        element={<AdminBookingsPage />}
+                      />
+                    </Route>
+                    <Route
+                      element={
+                        <ProtectedRoute
+                          requiredRoles={["TECHNICIAN", "ADMIN"]}
+                        />
+                      }
+                    >
+                      <Route
+                        path="/maintenance"
+                        element={<div>Maintenance Dashboard</div>}
+                      />
+                    </Route>
+                  </Routes>
+                </main>
+              </div>
+            }
+          />
+        </Route>
+      </Routes>
+    </>
   );
 }
 
