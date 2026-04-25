@@ -14,6 +14,9 @@ import AdminUsersPage from './pages/AdminUsersPage'
 import CreateTicket from "./pages/CreateTicket";
 import TicketDetail from "./pages/TicketDetail";
 import TicketList from "./pages/TicketList";
+import MaintenanceDashboard from "./pages/MaintenanceDashboard";
+import ManagerDashboard from "./pages/ManagerDashboard";
+import SchedulePage from "./pages/SchedulePage";
 import { useAuth } from './contexts/AuthContext'
 import { Toaster } from 'react-hot-toast'
 
@@ -60,7 +63,10 @@ function App() {
                     <Route path="/" element={<DashboardPage onNavigate={handleNavigate} />} />
                     <Route path="/resources" element={<ResourcesPage />} />
                     <Route path="/bookings" element={<BookingsPage />} />
-                    <Route path="/admin/bookings" element={<AdminBookingsPage />} />
+                    <Route path="/schedule" element={<SchedulePage />} />
+                    <Route element={<ProtectedRoute requiredRoles={["ADMIN"]} />}>
+                      <Route path="/admin/bookings" element={<AdminBookingsPage />} />
+                    </Route>
                     <Route path="/tickets" element={<TicketList />} />
                     <Route path="/tickets/new" element={<CreateTicket />} />
                     <Route path="/tickets/:id" element={<TicketDetail />} />
@@ -70,7 +76,10 @@ function App() {
                       <Route path="/admin" element={<AdminUsersPage />} />
                     </Route>
                     <Route element={<ProtectedRoute requiredRoles={["TECHNICIAN", "ADMIN"]} />}>
-                      <Route path="/maintenance" element={<div>Maintenance Dashboard</div>} />
+                      <Route path="/maintenance" element={<MaintenanceDashboard />} />
+                    </Route>
+                    <Route element={<ProtectedRoute requiredRoles={["MANAGER", "ADMIN"]} />}>
+                      <Route path="/manager" element={<ManagerDashboard />} />
                     </Route>
                   </Routes>
                 </main>

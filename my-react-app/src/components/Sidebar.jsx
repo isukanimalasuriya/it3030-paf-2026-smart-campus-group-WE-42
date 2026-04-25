@@ -120,11 +120,10 @@ function Sidebar({ route, onNavigate, user, logout }) {
             {group.items.map((item) => (
               <button
                 key={item.id}
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left font-medium transition ${
-                  route === item.path
+                className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left font-medium transition ${route === item.path
                     ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/20"
                     : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                }`}
+                  }`}
                 onClick={() => onNavigate(item.path)}
               >
                 {item.icon}
@@ -146,11 +145,10 @@ function Sidebar({ route, onNavigate, user, logout }) {
               Maintenance
             </p>
             <button
-              className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left font-medium transition ${
-                route === "/maintenance"
+              className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left font-medium transition ${route === "/maintenance"
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/20"
                   : "text-slate-300 hover:bg-slate-800 hover:text-white"
-              }`}
+                }`}
               onClick={() => onNavigate("/maintenance")}
             >
               <svg
@@ -170,17 +168,44 @@ function Sidebar({ route, onNavigate, user, logout }) {
           </div>
         )}
 
+        {(user?.role === "MANAGER" || user?.role === "ADMIN") && (
+          <div className="mb-2">
+            <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+              Operations
+            </p>
+            <button
+              className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left font-medium transition ${route === "/manager"
+                  ? "bg-violet-600 text-white shadow-lg shadow-violet-900/20"
+                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                }`}
+              onClick={() => onNavigate("/manager")}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.6}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4 shrink-0"
+              >
+                <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Manager Dashboard
+            </button>
+          </div>
+        )}
+
         {user?.role === "ADMIN" && (
           <div className="mb-2">
             <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-500">
               Admin
             </p>
             <button
-              className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left font-medium transition ${
-                route === "/admin/bookings"
+              className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left font-medium transition ${route === "/admin/bookings"
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/20"
                   : "text-slate-300 hover:bg-slate-800 hover:text-white"
-              }`}
+                }`}
               onClick={() => onNavigate("/admin/bookings")}
             >
               <svg
@@ -197,11 +222,10 @@ function Sidebar({ route, onNavigate, user, logout }) {
               Manage Bookings
             </button>
             <button
-              className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left font-medium transition ${
-                route === "/admin"
+              className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left font-medium transition ${route === "/admin"
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/20"
                   : "text-slate-300 hover:bg-slate-800 hover:text-white"
-              }`}
+                }`}
               onClick={() => onNavigate("/admin")}
             >
               <svg
