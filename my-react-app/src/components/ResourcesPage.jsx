@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { api } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 
 const API_BASE_URL = "http://localhost:8080/api/resources";
 
@@ -99,7 +101,7 @@ function ResourceForm({ form, isEditing, onChange, onSubmit, onCancel }) {
             className="rounded-xl border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             name="capacity"
             type="number"
-            min="0"
+            min="1"
             value={form.capacity}
             onChange={onChange}
             placeholder="30"
@@ -236,6 +238,7 @@ function FilterPanel({ filters, setFilters, onApply, onReset, open }) {
 
 // ── ResourcesPage ────────────────────────────────────────────────────────────
 function ResourcesPage() {
+  const { user } = useAuth();
   const [resources, setResources] = useState([]);
   const [form, setForm] = useState(initialForm);
   const [editId, setEditId] = useState(null);
@@ -252,17 +255,20 @@ function ResourcesPage() {
   });
 
   const isEditing = useMemo(() => editId !== null, [editId]);
+  const role = user?.role?.toUpperCase() ?? "";
+  const isReadOnlyUser = role === "USER" || role === "STUDENT";
 
   // ── API helpers ────────────────────────────────────────────────────────────
   const loadResources = async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(API_BASE_URL);
-      if (!res.ok) throw new Error("Failed to load resources");
-      setResources(await res.json());
+      const res = await api.get("/api/resources");
+      setResources(res.data);
     } catch (e) {
-      setError(e.message);
+      setError(
+        e.response?.data?.message || e.message || "Failed to load resources",
+      );
     } finally {
       setLoading(false);
     }
@@ -286,6 +292,7 @@ function ResourcesPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isReadOnlyUser) return;
     setError("");
     setMessage("");
 
@@ -297,16 +304,16 @@ function ResourcesPage() {
       status: form.status,
     };
 
+    if (!isEditing && payload.capacity < 1) {
+      setError("Capacity must be at least 1");
+      return;
+    }
+
     try {
-      const url = isEditing ? `${API_BASE_URL}/${editId}` : API_BASE_URL;
-      const res = await fetch(url, {
-        method: isEditing ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Unable to save resource");
+      if (isEditing) {
+        await api.put(`/api/resources/${editId}`, payload);
+      } else {
+        await api.post("/api/resources", payload);
       }
       setMessage(
         isEditing
@@ -316,11 +323,14 @@ function ResourcesPage() {
       resetForm();
       await loadResources();
     } catch (e) {
-      setError(e.message);
+      setError(
+        e.response?.data?.message || e.message || "Unable to save resource",
+      );
     }
   };
 
   const handleEdit = (resource) => {
+    if (isReadOnlyUser) return;
     setForm({
       name: resource.name ?? "",
       type: resource.type ?? "room",
@@ -335,33 +345,39 @@ function ResourcesPage() {
   };
 
   const handleDelete = async (id) => {
+    if (isReadOnlyUser) return;
     setMessage("");
     setError("");
     try {
-      const res = await fetch(`${API_BASE_URL}/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete resource");
+      await api.delete(`/api/resources/${id}`);
       setMessage("Resource deleted");
       if (editId === id) resetForm();
       await loadResources();
     } catch (e) {
-      setError(e.message);
+      setError(
+        e.response?.data?.message || e.message || "Failed to delete resource",
+      );
     }
   };
 
   const handleToggleStatus = async (resource) => {
+    if (isReadOnlyUser) return;
     const nextStatus =
       resource.status === "ACTIVE" ? "OUT_OF_SERVICE" : "ACTIVE";
     try {
-      const res = await fetch(`${API_BASE_URL}/${resource.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...resource, status: nextStatus }),
+      await api.put(`/api/resources/${resource.id}`, {
+        name: resource.name,
+        type: resource.type,
+        capacity: resource.capacity,
+        location: resource.location,
+        status: nextStatus,
       });
-      if (!res.ok) throw new Error("Failed to update status");
       setMessage(`Status changed to ${normalizeStatusLabel(nextStatus)}`);
       await loadResources();
     } catch (e) {
-      setError(e.message);
+      setError(
+        e.response?.data?.message || e.message || "Failed to update status",
+      );
     }
   };
 
@@ -380,11 +396,12 @@ function ResourcesPage() {
     setError("");
     setMessage("");
     try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to apply filters");
-      setResources(await res.json());
+      const res = await api.get(url);
+      setResources(res.data);
     } catch (e) {
-      setError(e.message);
+      setError(
+        e.response?.data?.message || e.message || "Failed to apply filters",
+      );
     } finally {
       setLoading(false);
     }
@@ -405,7 +422,9 @@ function ResourcesPage() {
         <div>
           <h1 className="text-3xl font-semibold text-slate-900">Resources</h1>
           <p className="mt-1 text-slate-500">
-            Manage rooms, labs, and equipment availability.
+            {isReadOnlyUser
+              ? "View, filter rooms, labs, and equipment availability."
+              : "Manage rooms, labs, and equipment availability."}
           </p>
         </div>
 
@@ -435,24 +454,25 @@ function ResourcesPage() {
             )}
           </button>
 
-          {/* Add resource */}
-          <button
-            type="button"
-            onClick={() => {
-              resetForm();
-              setModalOpen(true);
-            }}
-            className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fillRule="evenodd"
-                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Add Resource
-          </button>
+          {!isReadOnlyUser && (
+            <button
+              type="button"
+              onClick={() => {
+                resetForm();
+                setModalOpen(true);
+              }}
+              className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Add Resource
+            </button>
+          )}
         </div>
       </header>
 
@@ -493,7 +513,7 @@ function ResourcesPage() {
                   <th className="px-5 py-3">Capacity</th>
                   <th className="px-5 py-3">Location</th>
                   <th className="px-5 py-3">Status</th>
-                  <th className="px-5 py-3">Actions</th>
+                  {!isReadOnlyUser && <th className="px-5 py-3">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -501,7 +521,7 @@ function ResourcesPage() {
                   <tr>
                     <td
                       className="px-5 py-10 text-center text-slate-400"
-                      colSpan={6}
+                      colSpan={isReadOnlyUser ? 5 : 6}
                     >
                       No resources found
                     </td>
@@ -535,28 +555,30 @@ function ResourcesPage() {
                           {normalizeStatusLabel(resource.status)}
                         </span>
                       </td>
-                      <td className="px-5 py-3">
-                        <div className="flex flex-wrap gap-1.5">
-                          <button
-                            className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-200"
-                            onClick={() => handleEdit(resource)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-100"
-                            onClick={() => handleDelete(resource.id)}
-                          >
-                            Delete
-                          </button>
-                          <button
-                            className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-200"
-                            onClick={() => handleToggleStatus(resource)}
-                          >
-                            Toggle
-                          </button>
-                        </div>
-                      </td>
+                      {!isReadOnlyUser && (
+                        <td className="px-5 py-3">
+                          <div className="flex flex-wrap gap-1.5">
+                            <button
+                              className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-200"
+                              onClick={() => handleEdit(resource)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-100"
+                              onClick={() => handleDelete(resource.id)}
+                            >
+                              Delete
+                            </button>
+                            <button
+                              className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-200"
+                              onClick={() => handleToggleStatus(resource)}
+                            >
+                              Toggle
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}
@@ -566,16 +588,17 @@ function ResourcesPage() {
         )}
       </div>
 
-      {/* Modal */}
-      <Modal open={modalOpen} onClose={resetForm}>
-        <ResourceForm
-          form={form}
-          isEditing={isEditing}
-          onChange={handleFormChange}
-          onSubmit={handleSubmit}
-          onCancel={resetForm}
-        />
-      </Modal>
+      {!isReadOnlyUser && (
+        <Modal open={modalOpen} onClose={resetForm}>
+          <ResourceForm
+            form={form}
+            isEditing={isEditing}
+            onChange={handleFormChange}
+            onSubmit={handleSubmit}
+            onCancel={resetForm}
+          />
+        </Modal>
+      )}
     </section>
   );
 }

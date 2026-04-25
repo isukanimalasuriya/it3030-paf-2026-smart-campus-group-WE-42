@@ -50,5 +50,25 @@ public class GlobalExceptionHandler {
         body.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
+    @ExceptionHandler(com.example.IT23234048.exception.InvalidTicketStateException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidTicketStateException(com.example.IT23234048.exception.InvalidTicketStateException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(com.example.IT23234048.exception.CommentNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleCommentNotFoundException(com.example.IT23234048.exception.CommentNotFoundException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(com.example.IT23234048.exception.TicketNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleTicketNotFoundException(com.example.IT23234048.exception.TicketNotFoundException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
 }
 
