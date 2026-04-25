@@ -31,11 +31,13 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final NotificationService notificationService;
     private final CommentService commentService;
+    private final com.example.IT23234048.auth.repository.UserRepository userRepository;
 
-    public TicketService(TicketRepository ticketRepository, NotificationService notificationService, CommentService commentService) {
+    public TicketService(TicketRepository ticketRepository, NotificationService notificationService, CommentService commentService, com.example.IT23234048.auth.repository.UserRepository userRepository) {
         this.ticketRepository = ticketRepository;
         this.notificationService = notificationService; // Using friend's NotificationService from Module D
         this.commentService = commentService;
+        this.userRepository = userRepository;
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'TECHNICIAN')")
@@ -165,11 +167,13 @@ public class TicketService {
 
         Ticket updatedTicket = ticketRepository.save(ticket);
         
-        notificationService.createNotification(
-            dto.getAssignedToEmail(), 
-            "You have been assigned to ticket " + updatedTicket.getTicketId(), 
-            NotificationType.GENERIC
-        );
+        userRepository.findByEmail(dto.getAssignedToEmail()).ifPresent(user -> {
+            notificationService.createNotification(
+                user.getId(), 
+                "You have been assigned to ticket " + updatedTicket.getTicketId(), 
+                NotificationType.GENERIC
+            );
+        });
         
         return updatedTicket;
     }
